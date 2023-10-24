@@ -1,0 +1,25 @@
+---
+- name: Actualizar sistemas Debian
+  hosts: all
+  become: yes  # Ejecutar comandos con privilegios de superusuario (sudo)
+
+  tasks:
+    - name: Actualizar lista de paquetes
+      apt:
+        update_cache: yes
+      register: apt_update
+
+    - name: Realizar actualización del sistema
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+      when: apt_update.changed
+
+    - name: Reiniciar el sistema si es necesario
+      command: shutdown -r now
+      async: 1
+      poll: 0
+      ignore_errors: yes
+      when: apt_update.changed
+
