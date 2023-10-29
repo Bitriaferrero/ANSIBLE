@@ -1,0 +1,30 @@
+---
+- name: Crear docker-compose con Prometheus
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Crear directorio para prometheus
+      file:
+        path: /opt/prometheus
+        state: directory
+
+    - name: Copiar archivo de configuración de prometheus
+      copy:
+        src: prometheus.yml
+        dest: /opt/prometheus/prometheus.yml
+
+    - name: Crear docker-compose con prometheus
+      community.docker.docker_compose:
+        project_src: /opt/prometheus
+        state: present
+        definition:
+          version: '3'
+          services:
+            prometheus:
+              image: prom/prometheus:v2.30.3
+              container_name: prometheus
+              ports:
+                - "9090:9090"
+              volumes:
+                - /opt/prometheus:/etc/prometheus/
